@@ -1,0 +1,390 @@
+/**
+ * Assignment 5 
+ * TCSS 305
+ */
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
+
+import tool.PaintShapes;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class DrawingPanel extends JPanel {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -133534756137630712L;
+    /**
+     * The default width of the frame.
+     */
+    public static final Dimension DEFAULT_SIZE = new Dimension(400, 200);
+    /**
+     * The default color of the frame.
+     */
+    public static final Color DEFAULT_COLOR = Color.white;
+    /**
+     * The default height of the frame.
+     */
+    public static final int DEFAULT_HEIGHT = 300;
+    /** The Initial Thickness.*/
+    public static final int DEFAULT_THICKNESS = 3;
+    /** Name of pencil tool. */
+    private static final String PENCIL = "Pencil";
+    /** Name of pencil tool. */
+    private static final String LINE = "Line";
+    /** Name of pencil tool. */
+    private static final String RECTANGLE = "Rectangle";
+    /** Name of pencil tool. */
+    private static final String ELLIPSE = "Ellipse";
+
+    /**
+     * The color for some elements in the GUI.
+     */
+    private static final Color UW_PURPLE = new Color(51, 0, 111);
+
+    /** The default filling Color for the Shape.  */
+    private static final Color DEFAULT_FILL_COLOR = new Color(232, 211, 162);
+
+    /**
+     * The Initial points.
+     */
+    private static int INITIAL_POINT = -52;
+    /**
+     * The color to be drawn with.
+     */
+    private Color myColor = UW_PURPLE;
+
+    /**
+     * The line width.
+     */
+    private int myThickness;
+
+    /** The fill Color currently used. */
+    private Color myFillColor;
+    /**
+     * String of the selected shape to be drawn.
+     */
+    private String mySelectedName;
+    /**
+     * list of shapes.
+     */
+    private final List<PaintShapes> myShapeList;
+    /**
+     * The current point.
+     */
+    private Point myCurrent;
+    /**
+     * The initial point.
+     */
+    private Point myInitial = new Point(INITIAL_POINT, INITIAL_POINT);
+    /** The most current line. */
+    private Line2D.Double myLine = new Line2D.Double();
+
+    /** the current rectangle. */
+    private Rectangle2D.Double myRectangle = new Rectangle2D.Double();
+
+    /** the most current Ellipse. */
+    private Ellipse2D.Double myEllipse = new Ellipse2D.Double();
+    /** The most current general path. */
+    private GeneralPath myPencil;
+    /** Whether or not the shape will actually be filled.*/
+    private boolean myFillShape;
+
+    /** Whether or not the "Fill" checkbox from MenuBar was selected.*/
+    private boolean myFillCheckbox;
+    /**
+     * Constructs the drawing area.
+     * 
+     */
+    public DrawingPanel() {
+        super();
+        myShapeList = new ArrayList<PaintShapes>();
+        helperMethod();
+    }
+
+    /**
+     * A helper method to setup the DrawingArea.
+     */
+    private void helperMethod() {
+        myThickness = DEFAULT_THICKNESS;
+        final AnActionListener listener = new AnActionListener();
+        addMouseMotionListener(listener);
+        addMouseListener(listener);
+        setPreferredSize(DEFAULT_SIZE);
+        myFillColor = DEFAULT_FILL_COLOR;
+        setBackground(DEFAULT_COLOR);
+        //        myFill = DEFAULT_FILL;
+        mySelectedName = LINE;
+        myPencil = new GeneralPath();
+        setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+    }
+
+    /**
+     * A method to set color.
+     * 
+     * @param the_color is the color to be set.
+     */
+    public void setColor(final Color theColor) {
+        myColor = theColor;
+    }
+    
+    /**
+     * Sets the current Fill color.
+     * 
+     * @param theColor the fill color to use.
+     */
+    public void setFill(final Color theColor) {
+        myFillColor = theColor;
+    }
+    
+    /**
+     * Returns the current fill color in use.
+     * 
+     * @return the current fill color.
+     */
+    public Color getFillColor() {
+        return myFillColor;
+    }
+
+    /**
+     * Returns the current drawing color in use.
+     * 
+     * @return the current drawing color.
+     */
+    public Color getColor() {
+        return myColor;
+    }
+
+    /** clears the panel.
+     */
+    public void clear() {
+        myShapeList.clear();
+        myLine = new Line2D.Double();
+        myRectangle = new Rectangle2D.Double();
+        myEllipse = new Ellipse2D.Double();
+        myPencil = new GeneralPath();
+        setCurrentPoint(new Point());
+        setInitialPoint(new Point(INITIAL_POINT, INITIAL_POINT));
+//        if (myFillCheckbox) {
+//            myFillCheckbox = false;
+//            firePropertyChange("fill", "filled", "unfilled");
+//        }
+        repaint();
+        firePropertyChange("clear", true, false);
+
+    }
+
+    /**
+     * Sets the string of the selected shape.
+     * 
+     * @param theSelected the name of the selected tool.
+     */
+    public void setSelected(final String theSelected) {
+        mySelectedName = theSelected;
+    }
+
+    /**
+     * Gives the name of the selected tool.
+     * 
+     * @return the selected tool.
+     */
+    public String getSelected() {
+        return mySelectedName;
+    }
+
+    /**
+     * Sets the current point.
+     * 
+     * @param theCurrent point from mouseDragged.
+     */
+    public void setCurrentPoint(final Point theCurrent) {
+        myCurrent = theCurrent;
+    }
+
+    /**
+     * A method to set the initial point.
+     * 
+     * @param theInitial point from mousePressed.
+     */
+    public void setInitialPoint(final Point theInitial) {
+        myInitial = theInitial;
+    }
+
+    /**
+     * A method to change the Thickness width.
+     * 
+     * @param theThickness .
+     */
+    public void setThickness(final int theThickness)  {
+        myThickness = theThickness;
+    }
+//    public void setFill(final Color theColor) {
+//        myFillColor = theColor;
+//    }
+
+    /**
+     * Here two booleans are being set to whether or not the "Fill" checkbox from MenuBar
+     * was selected. The reason there are two booleans that are being set to the same thing
+     * is because if the "Fill" checkbox is actually selected, and the pencil tool is selected,
+     * the "myWillFillShape" boolean will prevent the pencil tool from actually having
+     * a fill (see paintComponent below).
+     * @param theBoolean whether or not "Fill" was selected
+     */
+    public void fillBox(final boolean theBoolean) {
+        myFillShape = theBoolean; 
+        //the above boolean says if we will actually fill the shape
+        myFillCheckbox = theBoolean; 
+        //the above boolean says if the checkbox really was selected
+        //firePropertyChange("fill", true, false);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void paintComponent(final Graphics theGraphics) {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setPaint(myColor);
+        g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+
+        for (final PaintShapes p : myShapeList) {
+            g2d.setStroke(new BasicStroke(p.getThickness()));
+            if (p.isFilled()) {
+                g2d.setColor(p.getFillColor());
+                g2d.fill(p.getShape());
+                g2d.setColor(p.getColor());
+                g2d.draw(p.getShape());
+            } else {
+                g2d.setColor(p.getColor());
+                g2d.draw(p.getShape());
+            }
+        }
+        if (myInitial != null && myCurrent != null) {
+            if (getSelected().equals(PENCIL) && myThickness > 0) { 
+                myFillShape = false;
+                g2d.setColor(myColor);
+                g2d.setStroke(new BasicStroke(myThickness));
+                g2d.draw(myPencil);
+            } else if (getSelected().equals(LINE) && myThickness > 0) {
+                myLine = new Line2D.Double(myInitial.getX(), myInitial.getY(), 
+                        myCurrent.getX(), myCurrent.getY());
+                myFillShape = false;
+                g2d.setColor(myColor);
+                g2d.setStroke(new BasicStroke(myThickness));
+                g2d.draw(myLine);
+            } else {  //tool is either rectangle or ellipse
+                final double startX = Math.min(myInitial.getX(), myCurrent.getX());
+                final double startY = Math.min(myInitial.getY(), myCurrent.getY());
+                final double width = Math.max(myInitial.getX(), myCurrent.getX()) - startX;
+                final double height = Math.max(myInitial.getY(), myCurrent.getY()) - startY;
+
+                if (getSelected().equals(RECTANGLE) && myThickness > 0) {
+                    myRectangle = new Rectangle2D.Double(startX, startY, width, height);
+                    if (myFillCheckbox) {
+                        myFillShape = true;
+                        g2d.setColor(myFillColor); 
+                        g2d.fill(myRectangle);
+                        g2d.setStroke(new BasicStroke(myThickness));
+                        g2d.setColor(myColor);
+                        g2d.draw(myRectangle);
+                    } else {
+                        myFillShape = false;
+                        g2d.setColor(myColor);
+                        g2d.setStroke(new BasicStroke(myThickness));
+                        g2d.draw(myRectangle);
+                    }
+                } else if (getSelected().equals(ELLIPSE) && myThickness > 0) { 
+                    myEllipse = new Ellipse2D.Double(startX, startY, width, height);
+                    if (myFillCheckbox) {
+                        myFillShape = true;
+                        g2d.setColor(myFillColor); 
+                        g2d.fill(myEllipse);
+                        g2d.setStroke(new BasicStroke(myThickness));
+                        g2d.setColor(myColor);
+                        g2d.draw(myEllipse);
+                    } else {
+                        myFillShape = false;
+                        g2d.setColor(myColor);
+                        g2d.setStroke(new BasicStroke(myThickness));
+                        g2d.draw(myEllipse);
+                    }
+
+                }
+            }
+        }
+    }
+
+    /**
+     * An inner class that calls doSomething() on theOject.
+     */
+    final class AnActionListener extends MouseInputAdapter {
+        @Override
+        public void mousePressed(final MouseEvent theEvent) {
+            setInitialPoint(theEvent.getPoint());
+            setCurrentPoint(theEvent.getPoint());
+            if (PENCIL.equals(getSelected()) && myPencil.getCurrentPoint() == null) {
+                myPencil.moveTo(theEvent.getX(), theEvent.getY());
+            }
+//            if (RECTANGLE.equals(getSelected()) || ELLIPSE.equals(getSelected())) {
+//                firePropertyChange("fill", false, true);
+//            }
+            repaint();
+        }
+
+        @Override
+        public void mouseDragged(final MouseEvent theEvent) {
+            setCurrentPoint(theEvent.getPoint());
+            if (myPencil.getCurrentPoint() != null && PENCIL.equals(getSelected())) {
+                myPencil.lineTo(theEvent.getX(), theEvent.getY());
+            }
+            repaint();
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent theEvent) {
+            if (LINE.equals(getSelected())) {
+                myShapeList.add(new PaintShapes(myLine, myColor, myFillColor, 
+                        myFillShape, myThickness));
+            } else if (RECTANGLE.equals(getSelected())) {
+                myShapeList.add(new PaintShapes(new Rectangle2D.Double(
+                        myRectangle.getX(), myRectangle.getY(),
+                        myRectangle.getWidth(), myRectangle.getHeight()),
+                        myColor, myFillColor, myFillShape, myThickness));
+            } else if (ELLIPSE.equals(getSelected())) {
+                myShapeList.add(new PaintShapes(new Ellipse2D.Double(myEllipse.getX(),
+                        myEllipse.getY(), myEllipse.getWidth(), myEllipse.getHeight()),
+                        myColor, myFillColor, myFillShape, myThickness));
+            } else if (PENCIL.equals(getSelected())) {
+                myShapeList.add(new PaintShapes(myPencil, myColor, myFillColor, 
+                        myFillShape, myThickness));
+                myPencil = new GeneralPath();
+            }
+            myFillShape = myFillCheckbox; 
+            //since I release mouse, clear should be enabled
+            firePropertyChange("clear", false, true);
+        }
+    }
+}
+
+

@@ -1,0 +1,286 @@
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.event.MouseInputAdapter;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class DrawingPanel extends JPanel
+{
+
+  /**
+   * The default width of the frame.
+   */
+  public static final Dimension DEFAULT_SIZE = new Dimension(400, 300);
+
+  /**
+   * The default height of the frame.
+   */
+  public static final int DEFAULT_HEIGHT = 300;
+
+  /**
+   * The default color of the frame.
+   */
+  public static final Color DEFAULT_COLOR = Color.white;
+  public static final int DEFAULT_THICKNESS = 3;
+
+  /** Name of pencil tool. */
+  private static final String PENCIL = "Pencil";
+  /** Name of pencil tool. */
+  private static final String LINE = "Line";
+  /** Name of pencil tool. */
+  private static final String RECTANGLE = "Rectangle";
+  /** Name of pencil tool. */
+  private static final String ELLIPSE = "Ellipse";
+  /**
+   * The color for some elements in the GUI.
+   */
+  private static final Color UW_PURPLE = new Color(51, 0, 111);
+  /**
+   * The color to be drawn with.
+   */
+  private Color my_color = UW_PURPLE;
+
+  /**
+   * The line width.
+   */
+  private int my_thickness;
+
+  /** List of thicknesses used to redraw shapes with their respective thickness. */
+  private List<Integer> my_thickness_list = new ArrayList<Integer>();
+
+  /** List of colors used to redraw shapes with their respective color. */
+  private List<Color> my_color_list = new ArrayList<Color>();
+
+  /**
+   * String of the selected shape to be drawn.
+   */
+  private String my_selected_name;
+  /**
+   * list of shapes.
+   */
+  private final List<Shape> my_shape_list;
+  /**
+   * The current point.
+   */
+  private Point my_current;
+  /**
+   * The initial point.
+   */
+  private Point my_initial;
+  /** The most current line. */
+  private Line2D.Double my_line = new Line2D.Double();
+
+  /** the current rectangle. */
+  private Rectangle2D.Double my_rectangle = new Rectangle2D.Double();
+
+  /** the most current Ellipse. */
+  private Ellipse2D.Double my_ellipse = new Ellipse2D.Double();
+
+  /** The most current general path. */
+  private GeneralPath my_pencil;
+  /**
+   * Constructs the drawing area.
+   * 
+   * @param the_tool_bar the tool bar to used in the program.
+   */
+  public DrawingPanel(final JToolBar the_tool_bar)
+  {
+    super();
+    my_shape_list = new ArrayList<Shape>();
+    setUp();
+
+  }
+
+  /**
+   * A helper method to setup the DrawingArea.
+   */
+  private void setUp()
+  {
+    my_thickness = DEFAULT_THICKNESS;
+    final AnActionListener listener = new AnActionListener();
+    addMouseMotionListener(listener);
+    addMouseListener(listener);
+    setPreferredSize(DEFAULT_SIZE);
+    setBackground(DEFAULT_COLOR);
+    my_selected_name = LINE;
+    my_pencil = new GeneralPath();
+  }
+
+  /**
+   * A method to set color.
+   * 
+   * @param the_color is the color to be set.
+   */
+  public void setColor(final Color the_color)
+  {
+    my_color = the_color;
+  }
+
+  /** clears the panel. */
+  public void clear()
+  {
+    my_shape_list.clear();
+    my_color_list.clear();
+    my_thickness_list.clear();
+    my_pencil = new GeneralPath();
+    my_line = new Line2D.Double();
+    my_rectangle = new Rectangle2D.Double();
+    my_ellipse = new Ellipse2D.Double();
+    setCurrentPoint(new Point());
+    setInitialPoint(new Point());
+    repaint();
+  }
+
+  /**
+   * Sets the string of the selected shape.
+   * 
+   * @param the_selected the name of the selected tool.
+   */
+  public void setSelected(final String the_selected)
+  {
+    my_selected_name = the_selected;
+  }
+
+  /**
+   * Gives the name of the selected tool.
+   * 
+   * @return the selected tool.
+   */
+  public String getSelected()
+  {
+    return my_selected_name;
+  }
+
+  /**
+   * Sets the current point.
+   * 
+   * @param the_current point from mouseDragged.
+   */
+  public void setCurrentPoint(final Point the_current)
+  {
+    my_current = the_current;
+  }
+
+  /**
+   * A method to set the initial point.
+   * 
+   * @param the_initial point from mousePressed.
+   */
+  public void setInitialPoint(final Point the_initial)
+  {
+    my_initial = the_initial;
+  }
+
+  /**
+   * A method to change the Stroke width.
+   * 
+   * @param the_stroke the amount of stroke.
+   */
+  public void setStrokeAmount(final int the_stroke)
+  {
+    my_thickness = the_stroke;
+  }
+
+  /**
+   * Adds a shape to this panel to be drawn.
+   * 
+   * @param the_shape the shape to be drawn.
+   */
+  public void addShape(final Shape the_shape)
+  {
+    my_shape_list.add(the_shape);
+  }
+
+  /**
+   * Returns the list of shapes.
+   * 
+   * @return list of shapes.
+   */
+  public List<Shape> getShapes()
+  {
+    final List<Shape> copied_list = new ArrayList<>();
+    for (Shape s : my_shape_list)
+    {
+      copied_list.add(s);
+    }
+    return copied_list;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void paintComponent(final Graphics the_graphics)
+  {
+    super.paintComponent(the_graphics);
+    final Graphics2D g2d = (Graphics2D) the_graphics;
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setPaint(my_color);
+    g2d.setStroke(new BasicStroke(my_thickness));
+    if (LINE.equals(getSelected()) && my_current != null && my_initial != null)
+    {
+      my_line.setLine(my_initial, my_current);
+      g2d.draw(my_line);
+    }
+    if (!my_shape_list.isEmpty())
+    {
+      for (int i = 0; i < my_shape_list.size(); i++)
+      {
+        g2d.setColor(my_color_list.get(i));
+        g2d.setStroke(new BasicStroke(my_thickness_list.get(i)));
+        g2d.draw(my_shape_list.get(i));
+      }
+    }
+    
+  }
+
+  /**
+   * An inner class that calls doSomething() on the_object.
+   */
+  class AnActionListener extends MouseInputAdapter
+  {
+    @Override
+    public void mousePressed(final MouseEvent the_event)
+    {
+      setInitialPoint(the_event.getPoint());
+      setCurrentPoint(the_event.getPoint());
+      repaint();
+    }
+
+    @Override
+    public void mouseDragged(final MouseEvent the_event)
+    {
+      setCurrentPoint(the_event.getPoint());
+      repaint();
+    }
+
+    @Override
+    public void mouseReleased(final MouseEvent the_event)
+    {
+      my_color_list.add(my_color);
+      my_thickness_list.add(my_thickness);
+      if (LINE.equals(getSelected()))
+      {
+        addShape(new Line2D.Double(my_initial, my_current));
+      }
+    }
+  }
+}

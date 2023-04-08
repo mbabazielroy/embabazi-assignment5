@@ -1,0 +1,60 @@
+package tool;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JColorChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JToolBar;
+
+import view.DrawingPanel;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class ColorChooserAction extends AbstractAction
+{
+  /** The tool bar associated with the Action. */
+  private final JToolBar my_tool_bar;
+
+  /** The menu bar associated with the Action. */
+  private final JMenuBar my_menu_bar;
+
+  /** The panel associated with the Action. */
+  private final DrawingPanel my_panel;
+
+  /**
+   * Construct line action.
+   * 
+   * @param the_tool_bar the tool bar associated with this color chooser.
+   * @param the_menu_bar the menu bar associated with this color chooser.
+   * @param the_panel the panel of the color chooser.
+   */
+  public ColorChooserAction(final JToolBar the_tool_bar, final JMenuBar the_menu_bar,
+                            final DrawingPanel the_panel)
+  {
+    super("Color...");
+    my_menu_bar = the_menu_bar;
+    my_tool_bar = the_tool_bar;
+    my_panel = the_panel;
+    putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
+    putValue(Action.SELECTED_KEY, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void actionPerformed(final ActionEvent the_event)
+  {
+    final Color color = JColorChooser.showDialog(null, "Color Chooser", null);
+    JMenu j_menu = new JMenu();
+    j_menu = (JMenu) my_menu_bar.getComponent(2);
+    j_menu.getMenuComponent(0).setBackground(color);
+    my_tool_bar.getComponent(0).setBackground(color);
+    my_panel.setColor(color);
+  }
+}

@@ -1,0 +1,29 @@
+package tool;
+
+import java.awt.event.KeyEvent;
+
+import javax.swing.ImageIcon;
+
+import view.DrawingPanel;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class ElipseToolAction extends AbstractTool
+{
+    /** Name of the Ellipse. */
+    private static final String NAME = "Ellipse";
+    private final static ImageIcon theIcon = new ImageIcon("files/ellipse_bw.gif");
+
+
+    /**
+     * Construct Elipse action.
+     * 
+     * @param the_panel panel associated with this action.
+     */
+    public ElipseToolAction(final DrawingPanel the_panel)
+    {
+        super(NAME,  the_panel, KeyEvent.VK_E, theIcon);
+    }
+}

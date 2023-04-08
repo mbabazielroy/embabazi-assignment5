@@ -1,0 +1,29 @@
+package tool;
+
+import java.awt.event.KeyEvent;
+
+import javax.swing.ImageIcon;
+
+import view.DrawingPanel;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class PencilToolAction extends AbstractTool
+{
+    /** The name of the pencil tool. */
+    private static final String NAME = "Pencil";
+    private final static ImageIcon theIcon = new ImageIcon("files/pencil_bw.gif");
+
+    /**
+     * Construct pencil action.
+     * 
+     * @param the_panel panel associated with this action.
+     */
+    public PencilToolAction(final DrawingPanel the_panel)
+    {
+        super(NAME, the_panel, KeyEvent.VK_P, theIcon);
+
+    }
+}

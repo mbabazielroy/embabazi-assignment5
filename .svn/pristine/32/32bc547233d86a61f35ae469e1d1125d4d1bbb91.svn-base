@@ -1,0 +1,30 @@
+package tool;
+
+import java.awt.event.KeyEvent;
+
+import javax.swing.ImageIcon;
+
+import view.DrawingPanel;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class LineToolAction extends AbstractTool
+{
+    /**
+     * Line's name in a string.
+     */
+    private static final String NAME = "Line";
+    private final static ImageIcon theIcon = new ImageIcon("files/line_bw.gif");
+
+    /**
+     * Construct line action.
+     * 
+     * @param the_panel panel associated with this action.
+     */
+    public LineToolAction(final DrawingPanel the_panel)
+    {
+        super(NAME, the_panel, KeyEvent.VK_L, theIcon);
+    }
+}

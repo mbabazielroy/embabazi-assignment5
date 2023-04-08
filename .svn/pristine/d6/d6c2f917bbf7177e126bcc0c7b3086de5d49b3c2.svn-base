@@ -1,0 +1,68 @@
+/**
+ * Assignment 5 
+ * TCSS 305
+ */
+package tool;
+
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+
+import view.DrawingPanel;
+
+/**
+ *
+ * 
+ * @author embabazi
+ * @version 1
+ */
+public abstract class AbstractTool extends AbstractAction {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1716992851401984356L;
+
+    /** The JPanel associated with the Action. */
+    private final DrawingPanel myPanel;
+    /**
+     * Constructs an AbstractTool.
+     * 
+     * @param theName the name for the tool.
+     * @param theDrawingPanel the drawing area associated with the tool.
+     * @param theIcon the Icon for the tool 
+     */
+    protected AbstractTool(final String theName, final DrawingPanel theDrawingPanel,
+            final ImageIcon theIcon) {
+        super(theName);
+        myPanel = theDrawingPanel;
+        setUpAction(theName, theIcon);
+    }
+
+    /**
+     * Sets up the action for constructor.
+     * 
+     * @param theName the name of the action.
+     * @param theIcon The Icon to appear on the button.
+     */
+    private void setUpAction(final String theName , final ImageIcon theIcon) {
+        putValue(Action.SELECTED_KEY, true);
+        putValue(Action.NAME, theName);
+    
+        final ImageIcon icon = (ImageIcon) theIcon;
+        final Image largeImage =
+                icon.getImage().getScaledInstance(15, -1, java.awt.Image.SCALE_SMOOTH);
+        final ImageIcon largeIcon = new ImageIcon(largeImage);
+        putValue(Action.SMALL_ICON, largeIcon);
+        putValue(Action.LARGE_ICON_KEY, largeIcon);
+
+    }
+    /** {@inheritDoc} */
+    @Override
+    public void actionPerformed(final ActionEvent theEvent) {
+        myPanel.setSelected((String) getValue(Action.NAME.toString()));
+    }
+}

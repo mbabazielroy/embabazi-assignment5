@@ -1,0 +1,227 @@
+package view;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class MenuBar extends JMenuBar
+{
+    /**
+     * Array of the thickness options to be made.
+     */
+    private static final int[] BUTTONS = {1};
+
+    /**
+     * The minor tick spacing for the slider.
+     */
+    private static final int MINOR_TICK_SPACING = 1;
+
+    /**
+     * The major tick spacing for the slider.
+     */
+    private static final int MAJOR_TICK_SPACING = 5;
+    /**
+     * The initial frames per second at which the simulation will run.
+     */
+    private static final int INITIAL_SIZE = 3;
+
+    /**
+     * The maximum frames per second at which the simulation will run.
+     */
+    private static final int MAX_SIZE = 15;
+    /**
+     * The slider for pencil size.
+     */
+    private JSlider mySlider;
+    /** The Option pane displayed when help button is clicked. */
+    private static JOptionPane my_help_pane;
+    /** the file options. */
+    private final JMenu my_options_menu = new JMenu("Options");
+    /** the file tools. */
+    private final JMenu my_tools_menu = new JMenu("Tools");
+    /** the help menu. */
+    private final JMenu my_help_menu = new JMenu("Help");
+    /** the button group for tool menu items. */
+    private final ButtonGroup my_tool_group = new ButtonGroup();
+    /** the button group for thickness menu items. */
+    private final ButtonGroup my_thickness_group = new ButtonGroup();
+    /** A button to clear the DrawingArea. */
+    private final JMenuItem my_clear_button = new JMenuItem("Clear");
+    /** A menu item for the Thickness radio buttons. */
+    private final JMenu my_thickness = new JMenu("Thickness");
+    private final JMenu my_Color = new JMenu("Color...");
+    /** the button to pull up the about index. */
+    private final JMenuItem my_about = new JMenuItem("About...");
+    /**
+     * 
+     */
+    private static int mySize = 5;
+
+    final ImageIcon img = new ImageIcon("files/w_small.png");
+
+    /**
+     * Constructs the menu bar.
+     * 
+     * @param the_frame the JFrame which will contain this JMenuBar
+     */
+    public MenuBar(final JFrame the_frame)
+    {
+        super();
+        setUpMenu(the_frame);
+
+    }
+
+    /**
+     * Sets up the menu bar.
+     * 
+     * @param the_frame the Jframe the menu is attached to.
+     */
+    private void setUpMenu(final JFrame the_frame)
+    {
+        my_options_menu.setMnemonic(KeyEvent.VK_O);
+        my_tools_menu.setMnemonic(KeyEvent.VK_T);
+        my_help_menu.setMnemonic(KeyEvent.VK_H);
+        my_about.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent theEvent) {
+                JOptionPane.showMessageDialog(null,
+                        "Mbabazi Elroy\n Autumn 2022",
+                        "TCSS 305 Paint",
+                        JOptionPane.PLAIN_MESSAGE,img);
+            }
+        });
+
+        my_clear_button.setMnemonic(KeyEvent.VK_C);
+        my_thickness.setMnemonic(KeyEvent.VK_T);
+
+        my_options_menu.add(my_thickness);
+        my_options_menu.add(my_Color);
+        my_options_menu.add(my_clear_button);
+
+        my_about.setMnemonic(KeyEvent.VK_A);
+        my_help_menu.add(my_about);
+
+        add(my_options_menu);
+        add(my_tools_menu);
+        add(my_help_menu);
+    }
+
+
+    /**
+     * Creates a radio button menu item, associates an action with the button,
+     * adds the button to a button group, adds the button to the Tools menu.
+     * 
+     * @param the_action the Action to associate with the new button being
+     *          created.
+     */
+    public void createToolMenuButton(final Action the_action)
+    {
+        final JRadioButtonMenuItem created_button = new JRadioButtonMenuItem(the_action);
+        if ("Line".equals(created_button.getName()))
+        {
+            created_button.setSelected(true);
+        }
+        my_tool_group.add(created_button);
+        my_tools_menu.add(created_button);
+    }
+
+    /**
+     * Sets up the clear button to work for the specified Jpanel.
+     * 
+     * @param the_panel the JPanel to be cleared.
+     */
+    public void setUpClearButton(final DrawingPanel the_panel)
+    {
+        my_clear_button.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(final ActionEvent the_event)
+            {
+                the_panel.clear();
+            }
+        });
+        
+        my_clear_button.setEnabled(false);
+    }
+
+    /**
+     * Creates a radio button menu item, associates an action with the button,
+     * adds the button to a button group, adds the button to the options menu's
+     * thickness menu.
+     * 
+     * @param the_name of the button.
+     * @param the_area the area in which the thickness is changed on.
+     * @param the_amount the # the button holds.
+     */
+    private void createThicknessButton(final String the_name, final DrawingPanel the_area,
+            final int the_amount)
+    {
+        //final JRadioButtonMenuItem created_button = new JRadioButtonMenuItem(the_name);
+        mySlider = new JSlider(SwingConstants.HORIZONTAL, 0, MAX_SIZE,
+                INITIAL_SIZE);
+        mySlider.setMajorTickSpacing(MAJOR_TICK_SPACING);
+        mySlider.setMinorTickSpacing(MINOR_TICK_SPACING);
+        mySlider.setPaintLabels(true);
+        mySlider.setPaintTicks(true);
+        mySlider.addChangeListener(new ChangeListener() {
+            /** Called in response to slider events in this window. */
+            public void stateChanged(final ChangeEvent theEvent) {
+                final int value = mySlider.getValue();
+                if (value > 0) {
+                    mySize = value;
+                }
+            }
+        });
+        //created_button.setMnemonic(String.valueOf(the_amount).charAt(0));
+        //my_thickness_group.add(mySlider);
+        my_thickness.add(mySlider);
+    }
+
+    /**
+     * Creates radio buttons for thickness.
+     * 
+     * @param the_area the panel in which the thickness will be changed.
+     */
+    public void createThicknessButtons(final DrawingPanel the_area)
+    {
+
+        for (int i = 0; i < BUTTONS.length; i++)
+        {
+            createThicknessButton(String.valueOf(BUTTONS[i]), the_area, BUTTONS[i]);
+        }
+    }
+
+    /**
+     * Creates a button, associates it with an action, adds the button to a button
+     * group, adds the button to the Tool's menu.
+     * 
+     * @param the_action Action to associate with the new button being created.
+     */
+    public void createColorMenuButton(final Action the_action)
+    {
+        final JMenuItem created_button = new JMenuItem(the_action);
+        created_button.setBackground(Color.WHITE);
+        created_button.setSelected(false);
+        //my_tool_group.add(created_button);
+        my_options_menu.add(created_button);
+        my_Color.add(created_button);
+        my_options_menu.addSeparator();
+    }
+}

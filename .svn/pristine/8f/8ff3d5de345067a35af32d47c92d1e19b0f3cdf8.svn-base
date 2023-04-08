@@ -1,0 +1,94 @@
+/*
+ * TCSS 305 - Assignment 5
+ */
+
+package view;
+
+import java.awt.BorderLayout;
+import java.util.List;
+
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+
+import tool.AbstractTool;
+import tool.ColorChooserAction;
+import tool.ElipseToolAction;
+import tool.LineToolAction;
+import tool.PencilToolAction;
+import tool.RectangleToolAction;
+
+
+
+/**
+ * Presents the GUI for the PowerPaint application.
+ * 
+ * @author Alan Fowler (acfowler@uw.edu)
+ * @version Autumn 2022
+ */
+public final class PaintGUI {
+
+    // constants (if any)    
+    // instance fields
+    private JFrame myFrame;
+    /** A list of color actions. */
+    private List<AbstractTool> myActions;
+
+    public PaintGUI() {   
+        super();
+
+        // initialize instance fields here
+        myFrame = new JFrame("TCSS 305 Paint – Autumn 2022");
+
+
+        start();
+    }
+
+    /**
+     * Performs all tasks necessary to display the UI.
+     */
+    protected void start() {
+        // replace the default JFrame icon
+        final ImageIcon img = new ImageIcon("files/w_small.png");
+        myFrame.setIconImage(img.getImage());
+
+        final MenuBar menu_bar = new MenuBar(myFrame);
+        final ToolBar tool_bar = new ToolBar();
+        final DrawingPanel panel = new DrawingPanel(tool_bar);
+        final ColorChooserAction color_action = new ColorChooserAction(tool_bar, menu_bar, panel);
+        menu_bar.createColorMenuButton(color_action);
+        //tool_bar.createColorButton(color_action);
+        menu_bar.createThicknessButtons(panel);
+//        myActions = new ArrayList<AbstractTool>();
+//        myActions.add(new AbstractTool("Line", new ImageIcon("./line.gif"),
+        //new LineToolAction(panel)));
+//        myActions.add(new AbstractTool("Rectangle", new ImageIcon
+        //("./rectangle.gif"),new RectangleToolAction(panel)));
+//        myActions.add(new AbstractTool("Elipse", new ImageIcon
+        //("./ellipse.gif"),new ElipseToolAction(panel)));
+        final Action[] actions =
+            { new LineToolAction(panel),
+                    new RectangleToolAction(panel), new ElipseToolAction(panel),
+                    new PencilToolAction(panel)};
+
+        for (Action a : actions)
+        {
+            menu_bar.createToolMenuButton(a);
+            tool_bar.createToggleButton(a);
+        }
+        menu_bar.setUpClearButton(panel);
+
+        myFrame.setJMenuBar(menu_bar);
+        myFrame.add(tool_bar, BorderLayout.SOUTH);
+        myFrame.add(panel, BorderLayout.CENTER);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.pack();
+        myFrame.setLocationRelativeTo(null);
+        myFrame.setVisible(true);
+
+    }
+
+}
+
+
+

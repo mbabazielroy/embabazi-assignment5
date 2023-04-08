@@ -1,0 +1,333 @@
+/**
+ * Assignment 5 
+ * TCSS 305
+ */
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class DrawingPanel extends JPanel implements PropertyChangeListener {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -133534756137630712L;
+
+    /**
+     * The default height of the frame.
+     */
+    public static final int DEFAULT_HEIGHT = 300;
+    /** The Initial Thickness.*/
+    public static final int DEFAULT_THICKNESS = 3;
+    /**
+     * The default color of the frame.
+     */
+    public static final Color DEFAULT_COLOR = Color.white;
+    /**
+     * The default width of the frame.
+     */
+    public static final Dimension DEFAULT_SIZE = new Dimension(400, 200);
+
+    /** Name of pencil tool. */
+    private static final String PENCIL = "Pencil";
+    /** Name of pencil tool. */
+    private static final String LINE = "Line";
+    /** Name of pencil tool. */
+    private static final String RECTANGLE = "Rectangle";
+    /** Name of pencil tool. */
+    private static final String ELLIPSE = "Ellipse";
+
+    /**
+     * The color for some elements in the GUI.
+     */
+    private static final Color UW_PURPLE = new Color(51, 0, 111);
+    /**
+     * The Initial points.
+     */
+    private static int INITIAL_POINT = -52;
+    /**
+     * The color to be drawn with.
+     */
+    private Color myColor = UW_PURPLE;
+
+    /**
+     * The line width.
+     */
+    private int myThickness;
+
+    /** List of thicknesses used to redraw shapes with their respective thickness. */
+    private final List<Integer> myThicknessList = new ArrayList<Integer>();
+
+    /** List of colors used to redraw shapes with their respective color. */
+    private final List<Color> myColorList = new ArrayList<Color>();
+
+    /**
+     * String of the selected shape to be drawn.
+     */
+    private String mySelectedName;
+    /**
+     * list of shapes.
+     */
+    private final List<Shape> myShapeList;
+    /**
+     * The current point.
+     */
+    private Point myCurrent;
+    /**
+     * The initial point.
+     */
+    private Point myInitial = new Point(INITIAL_POINT, INITIAL_POINT);
+    /** The most current line. */
+    private Line2D.Double myLine = new Line2D.Double();
+
+    /** the current rectangle. */
+    private Rectangle2D.Double myRectangle = new Rectangle2D.Double();
+
+    /** the most current Ellipse. */
+    private Ellipse2D.Double myEllipse = new Ellipse2D.Double();
+    /** The most current general path. */
+    private GeneralPath myPencil;
+    /**
+     * Constructs the drawing area.
+     * 
+     * @param the_tool_bar the tool bar to used in the program.
+     */
+    public DrawingPanel() {
+        super();
+        myShapeList = new ArrayList<Shape>();
+        helperMethod();
+
+    }
+
+    /**
+     * A helper method to setup the DrawingArea.
+     */
+    private void helperMethod() {
+        myThickness = DEFAULT_THICKNESS;
+        final AnActionListener listener = new AnActionListener();
+        addMouseMotionListener(listener);
+        addMouseListener(listener);
+        setPreferredSize(DEFAULT_SIZE);
+        setBackground(DEFAULT_COLOR);
+        mySelectedName = LINE;
+        myPencil = new GeneralPath();
+        setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+    }
+
+    /**
+     * A method to set color.
+     * 
+     * @param the_color is the color to be set.
+     */
+    public void setColor(final Color theColor) {
+        myColor = theColor;
+    }
+
+    /** clears the panel.
+     * @param theSelected */
+    public void clear() {
+        myShapeList.clear();
+        myColorList.clear();
+        myThicknessList.clear();
+        myLine = new Line2D.Double();
+        myRectangle = new Rectangle2D.Double();
+        myEllipse = new Ellipse2D.Double();
+        myPencil = new GeneralPath();
+        setCurrentPoint(new Point());
+        setInitialPoint(new Point(INITIAL_POINT, INITIAL_POINT));
+        repaint();
+        firePropertyChange("clear", true, false);
+
+    }
+
+    /**
+     * Sets the string of the selected shape.
+     * 
+     * @param the_selected the name of the selected tool.
+     */
+    public void setSelected(final String theSelected) {
+        mySelectedName = theSelected;
+    }
+
+    /**
+     * Gives the name of the selected tool.
+     * 
+     * @return the selected tool.
+     */
+    public String getSelected() {
+        return mySelectedName;
+    }
+
+    /**
+     * Sets the current point.
+     * 
+     * @param the_current point from mouseDragged.
+     */
+    public void setCurrentPoint(final Point theCurrent) {
+        myCurrent = theCurrent;
+    }
+
+    /**
+     * A method to set the initial point.
+     * 
+     * @param the_initial point from mousePressed.
+     */
+    public void setInitialPoint(final Point theInitial) {
+        myInitial = theInitial;
+    }
+
+    /**
+     * A method to change the Stroke width.
+     * 
+     * @param the_stroke the amount of stroke.
+     */
+    public void setThickness(final int theThickness)  {
+        myThickness = theThickness;
+    }
+
+    /**
+     * Adds a shape to this panel to be drawn.
+     * 
+     * @param the_shape the shape to be drawn.
+     */
+    public void addShape(final Shape theShape) {
+        myShapeList.add(theShape);
+    }
+
+    /**
+     * Returns the list of shapes.
+     * 
+     * @return list of shapes.
+     */
+    public List<Shape> getShapes() {
+        final List<Shape> copiedList = new ArrayList<>();
+        for (final Shape s : myShapeList) {
+            copiedList.add(s);
+        }
+        return copiedList;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void paintComponent(final Graphics theGraphics) {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setPaint(myColor);
+        g2d.setStroke(new BasicStroke(myThickness));
+
+        if (myInitial != null && myCurrent != null) {
+            if (getSelected().equals(PENCIL)) {                    
+                g2d.draw(myPencil);
+            }
+            else if (getSelected().equals(LINE)) {
+                myLine = new Line2D.Double(myInitial.getX(), myInitial.getY(), 
+                        myCurrent.getX(), myCurrent.getY());
+                g2d.draw(myLine);
+            }
+            else {  //tool is either rectangle or ellipse
+                final double startX = Math.min(myInitial.getX(), myCurrent.getX());
+                final double startY = Math.min(myInitial.getY(), myCurrent.getY());
+                final double width = Math.max(myInitial.getX(), myCurrent.getX()) - startX;
+                final double height = Math.max(myInitial.getY(), myCurrent.getY()) - startY;
+
+                if (getSelected().equals(RECTANGLE)) {
+                    myRectangle = new Rectangle2D.Double(startX, startY, width, height);
+                    g2d.draw(myRectangle);
+                } else { 
+                    myEllipse = new Ellipse2D.Double(startX, startY, width, height);
+                    g2d.draw(myEllipse);
+                }
+            }
+        }
+        if (!myShapeList.isEmpty()) {
+            for (int i = 0; i < myShapeList.size(); i++) {
+                g2d.setColor(myColorList.get(i));
+                g2d.setStroke(new BasicStroke(myThicknessList.get(i)));
+                g2d.draw(myShapeList.get(i));
+            }
+        }
+    }
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent) {
+        if ("clear".equals(theEvent.getPropertyName())) {
+            clear();
+        } 
+    }
+    //    
+    /**
+     * An inner class that calls doSomething() on theOject.
+     */
+    final class AnActionListener extends MouseInputAdapter {
+        @Override
+        public void mousePressed(final MouseEvent theEvent) {
+            setInitialPoint(theEvent.getPoint());
+            setCurrentPoint(theEvent.getPoint());
+            if (PENCIL.equals(getSelected()) && myPencil.getCurrentPoint() == null) {
+                myPencil.moveTo(theEvent.getX(), theEvent.getY());
+            }
+            repaint();
+        }
+
+        @Override
+        public void mouseDragged(final MouseEvent theEvent) {
+            setCurrentPoint(theEvent.getPoint());
+            if (myPencil.getCurrentPoint() != null && PENCIL.equals(getSelected())) {
+                myPencil.lineTo(theEvent.getX(), theEvent.getY());
+            }
+            repaint();
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent theEvent) {
+            //myReleased = true;
+            myColorList.add(myColor);
+            myThicknessList.add(myThickness);
+            if (LINE.equals(getSelected())) {
+                addShape(new Line2D.Double(myInitial, myCurrent));
+            }
+            else if (RECTANGLE.equals(getSelected())) {
+                addShape(new Rectangle2D.Double(myRectangle.getX(), myRectangle.getY(),
+                        myRectangle.getWidth(), myRectangle.getHeight()));
+            }
+            else if (ELLIPSE.equals(getSelected())) {
+                addShape(new Ellipse2D.Double(myEllipse.getX(), myEllipse.getY(), 
+                        myEllipse.getWidth(), myEllipse.getHeight()));
+
+            }
+            else if (PENCIL.equals(getSelected())) {
+                //myPencil = new GeneralPath();
+                addShape(myPencil);
+                myPencil = new GeneralPath();
+            }
+            //since I release mouse, clear should be enabled
+            firePropertyChange("clear", false, true);
+        }
+    }
+}
+

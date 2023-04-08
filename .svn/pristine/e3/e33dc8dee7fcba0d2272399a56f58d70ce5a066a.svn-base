@@ -1,0 +1,28 @@
+package tool;
+
+import java.awt.event.KeyEvent;
+
+import javax.swing.ImageIcon;
+
+import view.DrawingPanel;
+
+/**
+ *  @author embabazi
+ * @version 1
+ */
+public class RectangleToolAction extends AbstractTool
+{
+    /** Name of the Rectangle. */
+    private static final String NAME = "Rectangle";
+    private final static ImageIcon theIcon = new ImageIcon("files/rectangle_bw.gif");
+
+    /**
+     * Construct Rectangle action.
+     * 
+     * @param the_panel panel associated with this action.
+     */
+    public RectangleToolAction(final DrawingPanel the_panel)
+    {
+        super(NAME, the_panel, KeyEvent.VK_R, theIcon);
+    }
+}

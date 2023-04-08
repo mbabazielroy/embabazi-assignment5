@@ -1,0 +1,39 @@
+package view;
+
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+
+public class ToolBar extends JToolBar
+{
+    /** A button group for the tool bar buttons. */
+    private final ButtonGroup my_bgroup;
+
+    /**
+     * Constructs the toolbar.
+     */
+    public ToolBar()
+    {
+        super();
+        my_bgroup = new ButtonGroup();
+    }
+
+    /**
+     * Create a JToggleButton for the ToolBar.
+     * 
+     * @param an_action to associate with the created JToggleButton
+     */
+    public void createToggleButton(final Action an_action)
+    {
+        final JToggleButton toggle_button = new JToggleButton(an_action);
+        if ("Line".equals(toggle_button.getName()))
+        {
+            toggle_button.setSelected(true);
+        }
+        my_bgroup.add(toggle_button);
+        add(toggle_button);
+    }
+
+
+}

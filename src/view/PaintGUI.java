@@ -1,0 +1,78 @@
+/**
+ * Assignment 5 
+ * TCSS 305
+ */
+package view;
+
+import java.awt.BorderLayout;
+
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+
+import tool.ColorChooserAction;
+import tool.EllipseToolAction;
+import tool.LineToolAction;
+import tool.PencilToolAction;
+import tool.RectangleToolAction;
+
+/**
+ * Presents the GUI for the PowerPaint application.
+ * 
+ * @author Alan Fowler (acfowler@uw.edu)
+ * @version Autumn 2022
+ */
+public final class PaintGUI {
+
+    // constants (if any)
+    // instance fields
+    /**
+     * Creates a frame for the GUI.
+     */
+    private final JFrame myFrame;
+
+    public PaintGUI() {
+        super();
+
+        // initialize instance fields here
+        myFrame = new JFrame("TCSS 305 Paint – Autumn 2022");
+
+        start();
+    }
+
+    /**
+     * Performs all tasks necessary to display the UI.
+     */
+    protected void start() {
+        // replace the default JFrame icon
+        final ImageIcon img = new ImageIcon("files/w_small.png");
+        myFrame.setIconImage(img.getImage());
+
+        final MenuBar menuBar = new MenuBar();
+        final ToolBar toolBar = new ToolBar();
+        final DrawingPanel panel = new DrawingPanel();
+        final ColorChooserAction colorAction = new ColorChooserAction(menuBar, panel);
+        menuBar.createColorMenuButton(colorAction);
+        menuBar.createThicknessButtons(panel);
+        menuBar.drawColor(panel);
+        menuBar.fillCheckBox(panel);
+        final Action[] actions = {new LineToolAction(panel), new RectangleToolAction(panel),
+                new EllipseToolAction(panel), new PencilToolAction(panel)};
+
+        for (final Action a : actions) {
+            menuBar.createToolMenuButton(a);
+            toolBar.createToggleButton(a);
+        }
+        menuBar.setUpClearButton(panel);
+
+        panel.addPropertyChangeListener(menuBar);
+
+        myFrame.setJMenuBar(menuBar);
+        myFrame.add(toolBar, BorderLayout.SOUTH);
+        myFrame.add(panel, BorderLayout.CENTER);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.pack();
+        myFrame.setLocationRelativeTo(null);
+        myFrame.setVisible(true);
+    }
+}
